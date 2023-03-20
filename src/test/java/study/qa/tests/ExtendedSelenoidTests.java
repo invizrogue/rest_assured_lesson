@@ -1,11 +1,14 @@
 package study.qa.tests;
 
+import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 import study.qa.model.lombok.LoginBodyLombokModel;
 import study.qa.model.lombok.LoginResponseLombokModel;
 import study.qa.model.pojo.LoginBodyPojoModel;
 import study.qa.model.pojo.LoginResponsePojoModel;
+
+import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -13,6 +16,7 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
+import static study.qa.helpers.CustomAllureListener.withCustomTemplates;
 
 public class ExtendedSelenoidTests {
     /*
@@ -156,7 +160,7 @@ public class ExtendedSelenoidTests {
                 .log().status()
                 .log().body()
                 .statusCode(200)
-                .body("value.ready",  is(true));
+                .body("value.ready", is(true));
     }
 
     @Test
@@ -170,7 +174,7 @@ public class ExtendedSelenoidTests {
                 .log().status()
                 .log().body()
                 .statusCode(200)
-                .body("value.ready",  is(true));
+                .body("value.ready", is(true));
     }
 
     @Test
@@ -217,5 +221,80 @@ public class ExtendedSelenoidTests {
                 .extract().as(LoginResponseLombokModel.class);
 
         assertThat(loginResponse.getToken()).isEqualTo("QpwL5tke4Pnpja7X4");
+    }
+
+    @Test
+    void loginWithAllureTest() {
+
+        LoginBodyLombokModel loginBody = new LoginBodyLombokModel();
+        loginBody.setEmail("eve.holt@reqres.in");
+        loginBody.setPassword("cityslicka");
+
+        LoginResponseLombokModel loginResponse = given()
+                .filter(new AllureRestAssured())
+                .log().uri()
+                .log().body()
+                .contentType(JSON)
+                .body(loginBody)
+                .when()
+                .post("https://reqres.in/api/login")
+                .then()
+                .log().status()
+                .log().body()
+                .statusCode(200)
+                .extract().as(LoginResponseLombokModel.class);
+
+        assertThat(loginResponse.getToken()).isEqualTo("QpwL5tke4Pnpja7X4");
+    }
+
+    @Test
+    void loginWithCustomAllureTest() {
+
+        LoginBodyLombokModel loginBody = new LoginBodyLombokModel();
+        loginBody.setEmail("eve.holt@reqres.in");
+        loginBody.setPassword("cityslicka");
+
+        LoginResponseLombokModel loginResponse = given()
+                .filter(withCustomTemplates())
+                .log().uri()
+                .log().body()
+                .contentType(JSON)
+                .body(loginBody)
+                .when()
+                .post("https://reqres.in/api/login")
+                .then()
+                .log().status()
+                .log().body()
+                .statusCode(200)
+                .extract().as(LoginResponseLombokModel.class);
+
+        assertThat(loginResponse.getToken()).isEqualTo("QpwL5tke4Pnpja7X4");
+    }
+
+    @Test
+    void loginWithAllureStepsTest() {
+
+        LoginBodyLombokModel loginBody = new LoginBodyLombokModel();
+        loginBody.setEmail("eve.holt@reqres.in");
+        loginBody.setPassword("cityslicka");
+
+        LoginResponseLombokModel loginResponse =
+                step("Get authorization data", () ->
+                        given()
+                                .filter(withCustomTemplates())
+                                .log().uri()
+                                .log().body()
+                                .contentType(JSON)
+                                .body(loginBody)
+                                .when()
+                                .post("https://reqres.in/api/login")
+                                .then()
+                                .log().status()
+                                .log().body()
+                                .statusCode(200)
+                                .extract().as(LoginResponseLombokModel.class));
+
+        step("Verify authorization response", () ->
+                assertThat(loginResponse.getToken()).isEqualTo("QpwL5tke4Pnpja7X4"));
     }
 }

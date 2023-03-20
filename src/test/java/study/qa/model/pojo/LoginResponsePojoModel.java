@@ -1,6 +1,6 @@
-package study.qa.model;
+package study.qa.model.pojo;
 
-public class LoginResponseModel {
+public class LoginResponsePojoModel {
 
     String token;
 

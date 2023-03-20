@@ -1,6 +1,6 @@
-package study.qa.model;
+package study.qa.model.pojo;
 
-public class LoginBodyModel {
+public class LoginBodyPojoModel {
 //    "{ \"email\": \"eve.holt@reqres.in\", \"password\": \"cityslicka\"}";
 
     String email, password;
